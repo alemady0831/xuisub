@@ -1,0 +1,150 @@
+[
+  {
+    "dns": {
+      "queryStrategy": "UseIP",
+      "servers": [
+        {
+          "address": "8.8.8.8",
+          "skipFallback": false
+        }
+      ],
+      "tag": "dns_out"
+    },
+    "inbounds": [
+      {
+        "port": 10808,
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true,
+          "userLevel": 8
+        },
+        "sniffing": {
+          "destOverride": [
+            "http",
+            "tls",
+            "fakedns"
+          ],
+          "enabled": true
+        },
+        "tag": "socks"
+      },
+      {
+        "port": 10809,
+        "protocol": "http",
+        "settings": {
+          "userLevel": 8
+        },
+        "tag": "http"
+      }
+    ],
+    "log": {
+      "loglevel": "warning"
+    },
+    "outbounds": [
+      {
+        "protocol": "vless",
+        "tag": "proxy",
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "sockopt": {
+            "dialerProxy": "fragment",
+            "tcpKeepAliveIdle": 100,
+            "tcpNoDelay": true
+          },
+          "tlsSettings": {
+            "allowInsecure": false,
+            "alpn": [
+              "h2",
+              "http/1.1"
+            ],
+            "fingerprint": "chrome",
+            "serverName": "dl.golestan-vpn.link"
+          },
+          "wsSettings": {
+            "headers": {
+              "Host": "dl.golestan-vpn.link"
+            },
+            "path": "/frg"
+          }
+        },
+        "settings": {
+          "vnext": [
+            {
+              "address": "www.speedtest.net",
+              "port": 2087,
+              "users": [
+                {
+                  "encryption": "none",
+                  "id": "ec180220-0b62-4c8c-9a1e-34bb3dfc5faa",
+                  "level": 8
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "UseIP"
+        },
+        "tag": "direct"
+      },
+      {
+        "protocol": "blackhole",
+        "settings": {
+          "response": {
+            "type": "http"
+          }
+        },
+        "tag": "block"
+      },
+      {
+        "tag": "fragment",
+        "protocol": "freedom",
+        "settings": {
+          "domainStrategy": "AsIs",
+          "fragment": {
+            "packets": "tlshello",
+            "length": "10-20",
+            "interval": "10-20"
+          }
+        },
+        "streamSettings": {
+          "sockopt": {
+            "tcpKeepAliveIdle": 100,
+            "tcpNoDelay": true
+          }
+        }
+      }
+    ],
+    "policy": {
+      "levels": {
+        "8": {
+          "connIdle": 300,
+          "downlinkOnly": 1,
+          "handshake": 4,
+          "uplinkOnly": 1
+        }
+      },
+      "system": {
+        "statsOutboundDownlink": true,
+        "statsOutboundUplink": true
+      }
+    },
+    "remarks": "FRG-Temp-user",
+    "routing": {
+      "domainStrategy": "AsIs",
+      "rules": [
+        {
+          "network": "tcp,udp",
+          "outboundTag": "proxy",
+          "type": "field"
+        }
+      ]
+    },
+    "stats": {}
+  }
+]
